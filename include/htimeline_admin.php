@@ -21,44 +21,54 @@ along with HTCF.  If not, see <http://www.gnu.org/licenses/>.
 
 include('variables.php');
  
-        if($_POST['htimeline_hidden'] == 'Y') {  
-         //Form data sent  
-         $regex = $_POST['regex'];
-	 $output_format = $_POST['output_format'];
-	 $order = $_POST['order'];
-	 $css = $_POST['css'];
-         update_option('htimeline_regex', $regex);
-	 update_option('htimeline_output_format', $output_format); 
-	 update_option('htimeline_order', $order);
-	 update_option('htimeline_css', $css);
-           
+if($_POST['htimeline_hidden'] == 'Y') {  
+	//Form data sent  
+	$regex = $_POST['regex'];
+	$output_format = $_POST['output_format'];
+	$order = $_POST['order'];
+	$css = $_POST['css'];
+	$customfield = $_POST['timeline_customfield'];
+        update_option('htimeline_regex', $regex);
+	update_option('htimeline_output_format', $output_format); 
+	update_option('htimeline_order', $order);
+	update_option('htimeline_css', $css);
+	update_option('htimeline_customfield', $customfield);
         ?>  
         <div class="updated"><p><strong><?php _e('Options saved.' ); ?></strong></p></div>  
         <?php  
-     } else {  
-        $regex = get_option('htimeline_regex');
+} else {  
+	$regex = get_option('htimeline_regex');
 	$output_format = get_option('htimeline_output_format');
 	$order = get_option('htimeline_order');
 	$css = get_option('htimeline_css');
-    }  
- ?>  
+	$customfield = get_option('htimeline_customfield');
+}  
+?>  
 
 <div class="wrap">
 <h2>History Timeline</h2>
 <table class="widefat">
-	<tbody>
+<tbody>
 	<tr>
 	<td scope="col">
 		<div style="position: relative; float: left; width: 55%;">
 			<h3>How to use history timeline</h3>
 			<p class="tagcode">
-				Copy and paste this code in your article, page or widget content.<br/>
+				Copy and paste this code in your article, page or widget content: <code>[history_timeline]</code>
 			</p>
-			<b>[history_timeline]</b><br>
 			
 			<h3>Customize options</h3>
 			<form name="htimeline_form" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">  
-			<p><input type="hidden" name="htimeline_hidden" value="Y">
+			<input type="hidden" name="htimeline_hidden" value="Y">
+
+			<p>			
+			<?php _e("Custom Field name: "); ?>
+			&nbsp;
+			<input name="timeline_customfield" value="<?php echo $customfield ?>"/><br/>			
+			<i>Timeline entries will be dated by reading this field; only posts with this field will show up in the timeline.</i>
+			</p>
+
+			<p>
 			<?php _e("Input date format: " ); ?>
 			&nbsp;
 			<select name="regex">
@@ -67,9 +77,10 @@ include('variables.php');
 				else echo "<option value=\"".$format['regex']."\">".$format['date']."</option>";
 			}
 			?>
-			</select> 
-			<i>You must to write tag in the selected format</i>
+			</select><br/>
+			<i>Dates will be read from the custom field using this format.</i>
 			</p>
+			
 			<p>
 			<?php _e("Output date format: " ); ?>
 			&nbsp;
@@ -79,16 +90,20 @@ include('variables.php');
 				else echo "<option value=\"".$format."\">".$label."</option>";
 			}
 			?>
-			</select>
+			</select><br>
+			<i>Dates will be displayed in the timeline using this format.</i>
+			</p>
+
 			<p>
 			<?php _e("Order: " ); ?>
 			&nbsp;
 			<select name="order">
-				<option <? if($order=="sort") echo "selected"; ?> value="sort">lowest to highest</option>			
-				<option <? if($order=="rsort") echo "selected"; ?> value="rsort">highest to lowest</option>
-			</select>
-			 <i>The diplay order of the timeline</i>
+				<option <? if($order=="sort") echo "selected"; ?> value="sort">earliest at the top</option>			
+				<option <? if($order=="rsort") echo "selected"; ?> value="rsort">earliest at the bottom</option>
+			</select><br/>
+			<i>The diplay order of the timeline</i>
 			</p>
+			
 			<h3>Stylesheet<h3>
 			<textarea name="css" cols="60" rows="15"><? if($css=="") echo $default_css;
                            else echo $css;	

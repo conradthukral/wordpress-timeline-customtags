@@ -33,19 +33,18 @@ include('include/variables.php');
 global $wpdb;
 $regex=get_option('htimeline_regex');
 $display_order=get_option('htimeline_order');
+$customfield=get_option('htimeline_customfield');
 
-$allYears=$wpdb->get_results("SELECT DISTINCT meta_value FROM ".$wpdb->prefix."postmeta WHERE meta_key='Jahr' order by meta_value");
+$allYears=$wpdb->get_results("SELECT DISTINCT meta_value FROM ".$wpdb->prefix."postmeta WHERE meta_key='$customfield'");
 $already_viewed=array();
 $keys=array();
 $matrix=array();
 foreach($allYears as $thisYear) {
 	$yearVars=get_object_vars($thisYear);
 	$year = $yearVars['meta_value'];
-	$correlati=get_posts('meta_key=Jahr&meta_value='.$year.'&order=ASC&orderby=title');
+	$correlati=get_posts("meta_key=$customfield&meta_value=$year&order=ASC&orderby=title");
 	$i=0;
 	$post_t=get_object_vars($correlati[0]);
-	$print=true;
-	// shuffle($correlati);
 	
 	$posts = array();
 	for($i;$i<=count($correlati);$i++){
@@ -73,13 +72,13 @@ foreach($keys as $key){
 	$posts = $article['posts'];
 	$string.="<div class=\"timeline_row\">";
 	if($alt%2==0){
-		$string.="<div class=\"timeline_left\"><span class=\"timeline_tag\">".$year."</span></div><div class=\"timeline_right withborder\">";
+		$string.="<div class=\"timeline_left\"><span class=\"timeline_tag\">$year</span></div><div class=\"timeline_right withborder\">";
 		$string.=formatPosts($posts);
 		$string.="</div>";
 	} else{
 		$string.="<div class=\"timeline_left withborder\">";
 		$string.=formatPosts($posts);
-		$string.="</div><div class=\"timeline_right\"><span class=\"timeline_tag\">".$year."</span></div>";
+		$string.="</div><div class=\"timeline_right\"><span class=\"timeline_tag\">$year</span></div>";
 	}
 	$string.="<div class=\"timeline_clear\"></div></div>";
 	$alt++;
@@ -99,7 +98,7 @@ function formatPosts($posts) {
 		$titolo = $post_t['post_title'];
 		$titolo = preg_replace('/\(\d{2,4}\)$/', '', $titolo);
 		$link=get_permalink($post_t['ID']);
-		$result.="<a href=\"".$link."\">".$titolo."</a>";
+		$result.="<a href=\"$link\">".$titolo."</a>";
 	}
 	return $result;
 }
@@ -124,4 +123,3 @@ function htimeline_admin() {
 add_action('admin_menu', 'history_timeline_admin_actions');  
 
 ?>
-
