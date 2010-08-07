@@ -31,31 +31,28 @@ include('include/functions.php');
 include('include/variables.php');
 
 global $wpdb;
-$regex=get_option('htimeline_regex');
 $display_order=get_option('htimeline_order');
 $customfield=get_option('htimeline_customfield');
+$output_format=get_option('htimeline_output_format');
 
-$allYears=$wpdb->get_results("SELECT DISTINCT meta_value FROM ".$wpdb->prefix."postmeta WHERE meta_key='$customfield'");
-$already_viewed=array();
+$allDates=$wpdb->get_results("SELECT DISTINCT meta_value FROM ".$wpdb->prefix."postmeta WHERE meta_key='$customfield'");
 $keys=array();
 $matrix=array();
-foreach($allYears as $thisYear) {
-	$yearVars=get_object_vars($thisYear);
-	$year = $yearVars['meta_value'];
-	$correlati=get_posts("meta_key=$customfield&meta_value=$year&order=ASC&orderby=title");
+
+foreach($allDates as $thisDate) {
+	$dateVars=get_object_vars($thisDate);
+	$date = $dateVars['meta_value'];
+	$date_parsed = new DateTime($date);
+	$date_output = $date_parsed->format($output_format);
+	$correlati=get_posts("meta_key=$customfield&meta_value=$date&order=ASC&orderby=title");
 	$i=0;
-	$post_t=get_object_vars($correlati[0]);
 	
 	$posts = array();
 	for($i;$i<=count($correlati);$i++){
 		$posts[]=get_object_vars($correlati[$i]);
 	}
-	$keys[]=$year;
-
-	$article = array();
-	$article['tag']=$year;
-	$article['posts']=$posts;
-	$matrix[$year]=$article;
+	$keys[]=$date_output;
+	$matrix[$date_output]=$posts;
 }
 
 
@@ -66,10 +63,9 @@ if($display_order=="sort") sort($keys);
 else rsort($keys);
 
 foreach($keys as $key){
-	$article=$matrix[$key];
+	$posts=$matrix[$key];
 	$year=$key;
 	
-	$posts = $article['posts'];
 	$string.="<div class=\"timeline_row\">";
 	if($alt%2==0){
 		$string.="<div class=\"timeline_left\"><span class=\"timeline_tag\">$year</span></div><div class=\"timeline_right withborder\">";

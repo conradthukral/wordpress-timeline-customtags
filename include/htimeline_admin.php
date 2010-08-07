@@ -23,12 +23,10 @@ include('variables.php');
  
 if($_POST['htimeline_hidden'] == 'Y') {  
 	//Form data sent  
-	$regex = $_POST['regex'];
 	$output_format = $_POST['output_format'];
 	$order = $_POST['order'];
 	$css = $_POST['css'];
 	$customfield = $_POST['timeline_customfield'];
-        update_option('htimeline_regex', $regex);
 	update_option('htimeline_output_format', $output_format); 
 	update_option('htimeline_order', $order);
 	update_option('htimeline_css', $css);
@@ -37,7 +35,6 @@ if($_POST['htimeline_hidden'] == 'Y') {
         <div class="updated"><p><strong><?php _e('Options saved.' ); ?></strong></p></div>  
         <?php  
 } else {  
-	$regex = get_option('htimeline_regex');
 	$output_format = get_option('htimeline_output_format');
 	$order = get_option('htimeline_order');
 	$css = get_option('htimeline_css');
@@ -68,19 +65,6 @@ if($_POST['htimeline_hidden'] == 'Y') {
 			<i>Timeline entries will be dated by reading this field; only posts with this field will show up in the timeline.</i>
 			</p>
 
-			<p>
-			<?php _e("Input date format: " ); ?>
-			&nbsp;
-			<select name="regex">
-			<? foreach($date_formats_list as $format){
-				if($format['regex']==$regex) echo "<option value=\"".$format['regex']."\" selected>".$format['date']."</option>";
-				else echo "<option value=\"".$format['regex']."\">".$format['date']."</option>";
-			}
-			?>
-			</select><br/>
-			<i>Dates will be read from the custom field using this format.</i>
-			</p>
-			
 			<p>
 			<?php _e("Output date format: " ); ?>
 			&nbsp;
@@ -113,8 +97,6 @@ if($_POST['htimeline_hidden'] == 'Y') {
 			&nbsp;<input type="submit" class="button-primary" name="Submit" value="<?php _e('Update Options', 'oscimp_trdom' ) ?>" />
 			</p>
 			</form>
-			<p>
-			</p>
 		</div>
 	</td>
 	</tr>
