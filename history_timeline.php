@@ -110,7 +110,7 @@ function formatPosts($posts) {
 	foreach($posts as $post) {
 		$titolo = $post->post_title;
 		$titolo = preg_replace('/\(\d{2,4}\)$/', '', $titolo);
-		$link=get_permalink($post->id);
+		$link=get_permalink($post->ID);
 		$result.="<a href=\"$link\">".$titolo."</a>";
 	}
 	return $result;
