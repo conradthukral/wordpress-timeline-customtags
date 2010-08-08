@@ -34,6 +34,7 @@ global $wpdb;
 $display_order=get_option('htimeline_order');
 $customfield=get_option('htimeline_customfield');
 $output_format=get_option('htimeline_output_format');
+$year_only=get_option('htimeline_year_only');
 
 $allDates=$wpdb->get_results("SELECT DISTINCT meta_value FROM ".$wpdb->prefix."postmeta WHERE meta_key='$customfield'");
 $keys=array();
@@ -42,8 +43,9 @@ $matrix=array();
 foreach($allDates as $thisDate) {
 	$dateVars=get_object_vars($thisDate);
 	$date = $dateVars['meta_value'];
-	$date_parsed = new DateTime($date);
-	$date_output = $date_parsed->format($output_format);
+	$date_parsed = parseDate($date, $year_only);
+	$date_output = formatDate($date_parsed, $year_only, $output_format);
+	
 	$correlati=get_posts("meta_key=$customfield&meta_value=$date&order=ASC&orderby=title");
 	$i=0;
 	
@@ -87,6 +89,20 @@ return $string;
 }
 
 add_shortcode('history_timeline', 'print_timeline');
+
+function parseDate($dateStr, $year_only) {
+	if ($year_only) {
+		return $dateStr;
+	}
+	return new DateTime($dateStr);
+}
+
+function formatDate($date, $year_only, $output_format) {
+	if ($year_only) {
+		return $date;
+	}
+	return $date->format($output_format);
+}
 
 function formatPosts($posts) {
 	$result = '';

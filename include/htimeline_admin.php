@@ -23,18 +23,21 @@ include('variables.php');
  
 if($_POST['htimeline_hidden'] == 'Y') {  
 	//Form data sent  
-	$output_format = $_POST['output_format'];
-	$order = $_POST['order'];
-	$css = $_POST['css'];
+	$year_only = $_POST['timeline_year_only'] == 'true';
+	$output_format = $_POST['timeline_output_format'];
+	$order = $_POST['timeline_order'];
+	$css = $_POST['timeline_css'];
 	$customfield = $_POST['timeline_customfield'];
+	update_option('htimeline_year_only', $year_only);
 	update_option('htimeline_output_format', $output_format); 
 	update_option('htimeline_order', $order);
 	update_option('htimeline_css', $css);
 	update_option('htimeline_customfield', $customfield);
-        ?>  
-        <div class="updated"><p><strong><?php _e('Options saved.' ); ?></strong></p></div>  
-        <?php  
+	?>  
+	<div class="updated"><p><strong><?php _e('Options saved.' ); ?></strong></p></div>  
+	<?php  
 } else {  
+	$year_only = get_option('htimeline_year_only');
 	$output_format = get_option('htimeline_output_format');
 	$order = get_option('htimeline_order');
 	$css = get_option('htimeline_css');
@@ -65,23 +68,37 @@ if($_POST['htimeline_hidden'] == 'Y') {
 			<i>Timeline entries will be dated by reading this field; only posts with this field will show up in the timeline.</i>
 			</p>
 
+			<p>			
+			<?php _e("Input format: "); ?>
+			&nbsp;
+			<input type="radio" name="timeline_year_only" value="true" 
+				<?php if ($year_only) echo 'checked="checked"' ?> 
+				onclick="document.forms['htimeline_form'].timeline_output_format.disabled=true"
+			>Only the year</input>
+			<input type="radio" name="timeline_year_only" value="false" 
+				<?php if (!$year_only) echo 'checked="checked"' ?> 
+				onclick="document.forms['htimeline_form'].timeline_output_format.disabled=false"
+			>Full date</input><br />
+			<i>If you select "Full date" here, custom field values will be accepted in <a href="http://www.php.net/manual/en/datetime.formats.date.php">various formats</a>.</i> 
+			</p>
+
 			<p>
 			<?php _e("Output date format: " ); ?>
 			&nbsp;
-			<select name="output_format">
+			<select name="timeline_output_format" <?php if ($year_only) echo 'disabled="disabled"'?>>
 			<? foreach($date_print_formats as $label => $format){
 				if($format==$output_format) echo "<option value=\"".$format."\" selected>".$label."</option>";
 				else echo "<option value=\"".$format."\">".$label."</option>";
 			}
 			?>
 			</select><br>
-			<i>Dates will be displayed in the timeline using this format.</i>
+			<i>Dates will be displayed in the timeline using this format. Note that this only makes sense if you select "Full date" above.</i>
 			</p>
 
 			<p>
 			<?php _e("Order: " ); ?>
 			&nbsp;
-			<select name="order">
+			<select name="timeline_order">
 				<option <? if($order=="sort") echo "selected"; ?> value="sort">earliest at the top</option>			
 				<option <? if($order=="rsort") echo "selected"; ?> value="rsort">earliest at the bottom</option>
 			</select><br/>
@@ -89,8 +106,11 @@ if($_POST['htimeline_hidden'] == 'Y') {
 			</p>
 			
 			<h3>Stylesheet<h3>
-			<textarea name="css" cols="60" rows="15"><? if($css=="") echo $default_css;
-                           else echo $css;	
+			<textarea name="timeline_css" cols="60" rows="15"><? 
+				if($css=="") 
+					echo $default_css;
+                else 
+                	echo $css;	
 			?></textarea>
 			</p>				
 			<p class="submit">
