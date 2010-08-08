@@ -36,36 +36,33 @@ $customfield=get_option('htimeline_customfield');
 $output_format=get_option('htimeline_output_format');
 $year_only=get_option('htimeline_year_only');
 
-$allDates=$wpdb->get_results("SELECT DISTINCT meta_value FROM ".$wpdb->prefix."postmeta WHERE meta_key='$customfield'");
-$keys=array();
+$allPostsWithDates=$wpdb->get_results("SELECT post_id, meta_value FROM ".$wpdb->prefix."postmeta WHERE meta_key='$customfield'");
 $matrix=array();
 
-foreach($allDates as $thisDate) {
-	$dateVars=get_object_vars($thisDate);
-	$date = $dateVars['meta_value'];
-	$date_parsed = parseDate($date, $year_only);
+foreach($allPostsWithDates as $postWithDate) {
+	$date_parsed = parseDate($postWithDate->meta_value, $year_only);
 	$date_output = formatDate($date_parsed, $year_only, $output_format);
+	$post = get_post($postWithDate->post_id);
 	
-	$correlati=get_posts("meta_key=$customfield&meta_value=$date&order=ASC&orderby=title");
-	$i=0;
-	
-	$posts = array();
-	for($i;$i<=count($correlati);$i++){
-		$posts[]=get_object_vars($correlati[$i]);
-	}
-	$keys[]=$date_output;
-	$matrix[$date_output]=$posts;
+	if (array_key_exists($date_output, $matrix)) {
+		$values = $matrix[$date_output];
+	} else {
+		$values = array();
+	} 
+	$values []= $post;
+	$matrix[$date_output] = $values;
 }
-
 
 $string="<div id=\"history_timeline\">";
 $alt=0;
 
+$keys = array_keys($matrix);
 if($display_order=="sort") sort($keys);
 else rsort($keys);
 
 foreach($keys as $key){
 	$posts=$matrix[$key];
+	uasort($posts, "compare_posts_by_title");
 	$year=$key;
 	
 	$string.="<div class=\"timeline_row\">";
@@ -104,12 +101,16 @@ function formatDate($date, $year_only, $output_format) {
 	return $date->format($output_format);
 }
 
+function compare_posts_by_title($a, $b) {
+    return strcmp($a->post_title, $b->post_title);
+}
+
 function formatPosts($posts) {
 	$result = '';
-	foreach($posts as $post_t) {
-		$titolo = $post_t['post_title'];
+	foreach($posts as $post) {
+		$titolo = $post->post_title;
 		$titolo = preg_replace('/\(\d{2,4}\)$/', '', $titolo);
-		$link=get_permalink($post_t['ID']);
+		$link=get_permalink($post->id);
 		$result.="<a href=\"$link\">".$titolo."</a>";
 	}
 	return $result;
